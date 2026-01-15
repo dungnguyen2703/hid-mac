@@ -1,0 +1,54 @@
+# Xcode
+# Build products
+build/
+DerivedData/
+*.xcarchive
+
+# User settings
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+xcuserdata/
+*.xcuserstate
+
+# Workspace
+*.xcworkspace
+xcshareddata/WorkspaceSettings.xcsettings
+
+# Swift Package Manager
+/.build/
+/.swiftpm/
+Packages/
+
+# CocoaPods
+Pods/
+Podfile.lock
+
+# Carthage
+Carthage/Build/
+
+# fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/
+
+# Playgrounds
+timeline.xctimeline
+playground.xcworkspace
+
+# macOS
+.DS_Store
+
+# Xcode indexes, logs, and generated files
+*.moved-aside
+*.hmap
+*.ipa
+*.dSYM
+*.app.dSYM
+*.log
+
+# Other
+*.xcsettings
+*.xccheckout
+*.orig
