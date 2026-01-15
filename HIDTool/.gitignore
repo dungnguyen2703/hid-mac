@@ -37,10 +37,6 @@ fastlane/screenshots/
 timeline.xctimeline
 playground.xcworkspace
 
-# macOS
-.DS_Store
-**/.DS_Store
-
 # Xcode indexes, logs, and generated files
 *.moved-aside
 *.hmap
