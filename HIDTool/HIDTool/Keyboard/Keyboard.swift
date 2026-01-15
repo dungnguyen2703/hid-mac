@@ -5,10 +5,14 @@ import AppKit
 public func parseKeyboardEvent(type: CGEventType, event: CGEvent) -> (KeyID, KeyAction) {
     let keycode = event.getIntegerValueField(.keyboardEventKeycode)
     let flags = event.flags
-    let ns = NSEvent(cgEvent: event)
-    let chars = ns?.charactersIgnoringModifiers
+    var chars: String? = nil
+    if type == .keyDown || type == .keyUp {
+        let ns = NSEvent(cgEvent: event)
+        chars = ns?.charactersIgnoringModifiers
+    }
     let mapped = mapKeycode(keycode, chars: chars)
     switch type {
+        
     case .keyDown:
         return (mapped, .tapDown)
     case .keyUp:
