@@ -21,7 +21,6 @@ public func parseKeyboardEvent(type: CGEventType, event: CGEvent) -> (KeyID, Key
     }
     let mapped = mapKeycode(keycode, chars: chars)
     
-    // Update State
     switch type {
     case .keyDown:
         KeyboardState.pressedKeys.insert(mapped)

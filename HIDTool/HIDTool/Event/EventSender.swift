@@ -19,6 +19,7 @@ public class EventSender {
     }
     
     private static func postEvent(keyCode: CGKeyCode, keyDown: Bool) {
+        print("postEvent \(keyCode), \(keyDown)")
         let source = CGEventSource(stateID: .hidSystemState)
         let event = CGEvent(keyboardEventSource: source, virtualKey: keyCode, keyDown: keyDown)
         event?.post(tap: .cghidEventTap)

@@ -5,7 +5,7 @@ public class MouseState {
     public static var pressedButtons: Set<MouseButton> = []
     
     public static func isPressed(_ button: MouseButton) -> Bool {
-        return pressedButtons.contains(button)
+        return false
     }
 }
 
@@ -52,7 +52,6 @@ public func parseMouseEvent(type: CGEventType, event: CGEvent) -> (MouseButton, 
          return (.none, .none)
     }
     
-    // Update State
     if action == .clickDown {
         MouseState.pressedButtons.insert(button)
     } else if action == .clickUp {

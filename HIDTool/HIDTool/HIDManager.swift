@@ -104,6 +104,9 @@ class HIDManager: ObservableObject {
         default:
             break
         }
+        if (keyID == nil && mouseButton == nil) {
+            return false
+        }
         
         return ProfileManager.shared.handleEvent(key: keyID, button: mouseButton)
     }
