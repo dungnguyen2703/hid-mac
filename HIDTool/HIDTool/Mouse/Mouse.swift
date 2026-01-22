@@ -1,52 +1,64 @@
 import Foundation
 import AppKit
 
+public class MouseState {
+    public static var pressedButtons: Set<MouseButton> = []
+    
+    public static func isPressed(_ button: MouseButton) -> Bool {
+        return pressedButtons.contains(button)
+    }
+}
+
 public func parseMouseEvent(type: CGEventType, event: CGEvent) -> (MouseButton, MouseAction) {
+    var button: MouseButton = .none
+    var action: MouseAction = .none
+    
     switch type {
     case .leftMouseDown:
-        return (.leftButton, .clickDown)
+        button = .leftButton; action = .clickDown
     case .leftMouseUp:
-        return (.leftButton, .clickUp)
+        button = .leftButton; action = .clickUp
     case .rightMouseDown:
-        return (.rightButton, .clickDown)
+        button = .rightButton; action = .clickDown
     case .rightMouseUp:
-        return (.rightButton, .clickUp)
+        button = .rightButton; action = .clickUp
     case .otherMouseDown:
-        let button = event.getIntegerValueField(.mouseEventButtonNumber)
-        if button == 2 {
-            return (.middleButton, .clickDown)
-        } else if button == 3 {
-            return (.backButton, .clickDown)
-        } else if button == 4 {
-            return (.forwardButton, .clickDown)
-        } else {
-            return (.other(button), .clickDown)
-        }
+        let btnNum = event.getIntegerValueField(.mouseEventButtonNumber)
+        if btnNum == 2 { button = .middleButton }
+        else if btnNum == 3 { button = .backButton }
+        else if btnNum == 4 { button = .forwardButton }
+        else { button = .none }
+        action = .clickDown
     case .otherMouseUp:
-        let button = event.getIntegerValueField(.mouseEventButtonNumber)
-        if button == 2 {
-            return (.middleButton, .clickUp)
-        } else if button == 3 {
-            return (.backButton, .clickUp)
-        } else if button == 4 {
-            return (.forwardButton, .clickUp)
-        } else {
-            return (.other(button), .clickUp)
-        }
+        let btnNum = event.getIntegerValueField(.mouseEventButtonNumber)
+        if btnNum == 2 { button = .middleButton }
+        else if btnNum == 3 { button = .backButton }
+        else if btnNum == 4 { button = .forwardButton }
+        else { button = .none }
+        action = .clickUp
     case .scrollWheel:
         let dy = event.getDoubleValueField(.scrollWheelEventDeltaAxis1)
         let dx = event.getDoubleValueField(.scrollWheelEventDeltaAxis2)
         if abs(dy) >= abs(dx) {
-            if dy > 0 { return (.scrollWheel, .scrollUp) }
-            if dy < 0 { return (.scrollWheel, .scrollDown) }
+            if dy > 0 { button = .scrollWheel; action = .scrollUp }
+            if dy < 0 { button = .scrollWheel; action = .scrollDown }
         } else {
-            if dx > 0 { return (.scrollWheel, .scrollRight) }
-            if dx < 0 { return (.scrollWheel, .scrollLeft) }
+            if dx > 0 { button = .scrollWheel; action = .scrollRight }
+            if dx < 0 { button = .scrollWheel; action = .scrollLeft }
         }
-        return (.scrollWheel, .none)
-
+        if action == .none { button = .scrollWheel; action = .none }
+        
     default:
-        return (.none, .none)
+         return (.none, .none)
     }
-
+    
+    // Update State
+    if action == .clickDown {
+        MouseState.pressedButtons.insert(button)
+    } else if action == .clickUp {
+        MouseState.pressedButtons.remove(button)
+    }
+    
+    return (button, action)
 }
+

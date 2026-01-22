@@ -91,9 +91,6 @@ class HIDManager: ObservableObject {
         switch type {
         case .keyDown, .keyUp, .flagsChanged:
             let result = parseKeyboardEvent(type: type, event: event)
-            // print("Key \(result.0) Action \(result.1)")
-            // Only consider tapDown/flagsChanged for triggers usually? 
-            // Or pass all events. Go code seems to act on Key Press (Down).
             if result.1 == .tapDown || result.1 == .modifierChanged {
                 keyID = result.0
             }
@@ -109,63 +106,6 @@ class HIDManager: ObservableObject {
         }
         
         return ProfileManager.shared.handleEvent(key: keyID, button: mouseButton)
-    }
-    
-    func moveSpace(direction: String) {
-        let keyCode = (direction == "left") ? "123" : "124"
-        
-        // Đoạn mã AppleScript để nhấn phím Control (key code 59) và Arrow
-        let scriptSource = """
-        tell application "System Events"
-            key down control
-            key code \(keyCode)
-            key up control
-        end tell
-        """
-        
-        // Thực thi script
-        if let script = NSAppleScript(source: scriptSource) {
-            var error: NSDictionary?
-            script.executeAndReturnError(&error)
-            
-            if let err = error {
-                print("Lỗi AppleScript: \(err)")
-            } else {
-                print("Đã chuyển Space sang \(direction) bằng AppleScript")
-            }
-        }
-    }
-    
-    func simulateKeyShortcut(direction: String) {
-        print("Đang ép gửi Control + \(direction)")
-        return
-        let source = CGEventSource(stateID: .hidSystemState)
-        
-        if source == nil {
-            return
-        }
-        
-        let ctrlKey: CGKeyCode = 59 // Left Control
-        let arrowKey: CGKeyCode = (direction == "left") ? 123 : 124
-        
-        // Tạo sự kiện
-        let ctrlDown = CGEvent(keyboardEventSource: source, virtualKey: ctrlKey, keyDown: true)
-        
-        let arrowDown = CGEvent(keyboardEventSource: source, virtualKey: arrowKey, keyDown: true)
-        
-        let arrowUp = CGEvent(keyboardEventSource: source, virtualKey: arrowKey, keyDown: false)
-        
-        let ctrlUp = CGEvent(keyboardEventSource: source, virtualKey: ctrlKey, keyDown: false)
-
-        ctrlDown?.post(tap: .cgAnnotatedSessionEventTap)
-        usleep(500000) // 15ms để hệ thống kịp nhận diện phím Modifier
-        
-        arrowDown?.post(tap: .cgAnnotatedSessionEventTap)
-        usleep(500000)
-        
-        // Nhả phím chính trước, phím Modifier (Control) sau cùng
-        arrowUp?.post(tap: .cgAnnotatedSessionEventTap)
-        ctrlUp?.post(tap: .cgAnnotatedSessionEventTap)
     }
     
     func updateProfile(_ name: String) {

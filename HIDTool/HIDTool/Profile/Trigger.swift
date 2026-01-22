@@ -44,14 +44,8 @@ public struct KeyTrigger: Trigger, Decodable {
     }
     
     public func isTrigger(key: KeyID?, button: MouseButton?) -> Bool {
-        if let currentKey = key, currentKey == self.key {
-            return true
-        }
-        // Check global state if the key is currently held down
-        // TODO: Implement global state check wrapper if needed
-        // For now, we mainly rely on the event match.
-        // Windows implementation checks IsKeyPressed(key).
-        return false
+        let isPressed = KeyboardState.isPressed(self.key)
+        return self.key == key || isPressed
     }
 }
 
@@ -66,7 +60,6 @@ public struct MiceTrigger: Trigger, Decodable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let buttonName = try container.decode(String.self, forKey: .button)
-        // Simple mapping
         switch buttonName.lowercased() {
         case "left": self.button = .leftButton
         case "right": self.button = .rightButton
@@ -79,19 +72,6 @@ public struct MiceTrigger: Trigger, Decodable {
     }
     
     public func isTrigger(key: KeyID?, button: MouseButton?) -> Bool {
-        if let currentBtn = button {
-            // Compare enum equality (ignoring associated values if any differ, but here they are simple)
-            switch (self.button, currentBtn) {
-            case (.leftButton, .leftButton),
-                 (.rightButton, .rightButton),
-                 (.middleButton, .middleButton),
-                 (.backButton, .backButton),
-                 (.forwardButton, .forwardButton):
-                return true
-            default:
-                break
-            }
-        }
-        return false
+        return self.button == button || MouseState.isPressed(self.button)
     }
 }

@@ -2,6 +2,15 @@ import Foundation
 import AppKit
 
 
+public class KeyboardState {
+    public static var pressedKeys: Set<KeyID> = []
+    
+    public static func isPressed(_ key: KeyID) -> Bool {
+        return pressedKeys.contains(key)
+    }
+}
+
+
 public func parseKeyboardEvent(type: CGEventType, event: CGEvent) -> (KeyID, KeyAction) {
     let keycode = event.getIntegerValueField(.keyboardEventKeycode)
     let flags = event.flags
@@ -11,8 +20,20 @@ public func parseKeyboardEvent(type: CGEventType, event: CGEvent) -> (KeyID, Key
         chars = ns?.charactersIgnoringModifiers
     }
     let mapped = mapKeycode(keycode, chars: chars)
+    
+    // Update State
     switch type {
-        
+    case .keyDown:
+        KeyboardState.pressedKeys.insert(mapped)
+    case .keyUp:
+        KeyboardState.pressedKeys.remove(mapped)
+    case .flagsChanged:
+        updateModifierState(flags: flags, key: mapped)
+    default:
+        break
+    }
+    
+    switch type {
     case .keyDown:
         return (mapped, .tapDown)
     case .keyUp:
@@ -24,6 +45,27 @@ public func parseKeyboardEvent(type: CGEventType, event: CGEvent) -> (KeyID, Key
         return (.none, .none)
     }
 
+}
+
+private func updateModifierState(flags: CGEventFlags, key: KeyID) {
+    let isPressed = flags.contains(flagFor(key))
+    if isPressed {
+        KeyboardState.pressedKeys.insert(key)
+    } else {
+        KeyboardState.pressedKeys.remove(key)
+    }
+}
+
+private func flagFor(_ key: KeyID) -> CGEventFlags {
+    switch key {
+    case .shiftLeft, .shiftRight: return .maskShift
+    case .controlLeft, .controlRight: return .maskControl
+    case .optionLeft, .optionRight: return .maskAlternate
+    case .commandLeft, .commandRight: return .maskCommand
+    case .capsLock: return .maskAlphaShift
+    case .fn: return .maskSecondaryFn
+    default: return []
+    }
 }
 
 private func mapKeycode(_ code: Int64, chars: String?) -> KeyID {

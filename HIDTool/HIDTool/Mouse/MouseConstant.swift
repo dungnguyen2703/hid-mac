@@ -5,7 +5,6 @@ public enum MouseButton: Equatable {
     case backButton
     case forwardButton
     case scrollWheel
-    case other(Int64)
     case none
 }
 

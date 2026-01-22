@@ -30,11 +30,8 @@ public struct ProfileImpl: Profile, Decodable {
         if container.contains(.bindings) {
             var bindingsUnkeyed = try container.nestedUnkeyedContainer(forKey: .bindings)
             while !bindingsUnkeyed.isAtEnd {
-                // Try to decode as BindingMapping (since it's the only one for now)
-                // In Go, it checks "type" field. Here we can peek or just assume default.
-                // For robustness, we could use a wrapper similar to AnyAction
-                let binding = try bindingsUnkeyed.decode(BindingMapping.self)
-                bindingsArray.append(binding)
+                let anyBinding = try bindingsUnkeyed.decode(AnyBinding.self)
+                bindingsArray.append(anyBinding.binding)
             }
         }
         self.bindings = bindingsArray
