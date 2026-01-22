@@ -18,7 +18,6 @@ public func parseKeyboardEvent(type: CGEventType, event: CGEvent) -> (KeyID, Key
     case .keyUp:
         return (mapped, .tapUp)
     case .flagsChanged:
-        print("FlagsChanged keycode=\(keycode) flags=\(flags) -> \(mapped)")
         return (mapped, .modifierChanged)
 
     default:
@@ -29,7 +28,6 @@ public func parseKeyboardEvent(type: CGEventType, event: CGEvent) -> (KeyID, Key
 
 private func mapKeycode(_ code: Int64, chars: String?) -> KeyID {
     if let str = chars , let result = mapCharToKeyID(str){
-        print("Day ne \(result)")
         return result
     }
     // Media keys

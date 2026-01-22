@@ -44,7 +44,10 @@ class HIDManager: ObservableObject {
             callback: {(proxy, type, cgEvent, refcon) -> Unmanaged<CGEvent>? in
                 guard let refcon = refcon else { return Unmanaged.passUnretained(cgEvent) }
                 let manager = Unmanaged<HIDManager>.fromOpaque(refcon).takeUnretainedValue()
-                manager.handleEvent(type: type, event: cgEvent)
+                let shouldSuppress = manager.handleEvent(type: type, event: cgEvent)
+                if shouldSuppress {
+                    return nil
+                }
                 return Unmanaged.passUnretained(cgEvent)
             },
             userInfo: UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque()))
@@ -81,18 +84,31 @@ class HIDManager: ObservableObject {
         print("[HIDManager] [\(ts)] \(msg)")
     }
 
-    private func handleEvent(type: CGEventType, event: CGEvent) {
+    private func handleEvent(type: CGEventType, event: CGEvent) -> Bool {
+        var keyID: KeyID? = nil
+        var mouseButton: MouseButton? = nil
+        
         switch type {
         case .keyDown, .keyUp, .flagsChanged:
             let result = parseKeyboardEvent(type: type, event: event)
-            print("Key \(result.0) Action \(result.1)")
-            break
+            // print("Key \(result.0) Action \(result.1)")
+            // Only consider tapDown/flagsChanged for triggers usually? 
+            // Or pass all events. Go code seems to act on Key Press (Down).
+            if result.1 == .tapDown || result.1 == .modifierChanged {
+                keyID = result.0
+            }
+            
         case .leftMouseDown, .leftMouseUp, .rightMouseDown, .rightMouseUp, .otherMouseDown, .otherMouseUp, .scrollWheel:
             let result = parseMouseEvent(type: type, event: event)
-            break
+            if result.1 == .clickDown {
+                mouseButton = result.0
+            }
+            
         default:
             break
         }
+        
+        return ProfileManager.shared.handleEvent(key: keyID, button: mouseButton)
     }
     
     func moveSpace(direction: String) {
